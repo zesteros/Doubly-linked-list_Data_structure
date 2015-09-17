@@ -4,36 +4,36 @@ import javax.swing.*;
 public class DoublyLinkedList {
 
     public static void main(String[] args) {
-        List lista = new List();
+        List list = new List();
         String menu[] = {"Insertar valor", "Eliminar", "Recorrer hacia delante", "Recorrer hacia atrás", "Insertar ordenado", "Salir"};
         String decision = null;
         while (!"Salir".equals(decision)) {
             decision = (String) JOptionPane.showInputDialog(
                     null,
-                    "¿Qué desea hacer?",
-                    null,
+                    "Bienvenido\n¿Qué desea hacer?",
+                    "Lista Doblemente Enlazada",
                     JOptionPane.PLAIN_MESSAGE,
                     new ImageIcon(),
                     menu, menu[0]);
             switch (decision) {
                 case "Insertar valor":
-                    lista.addElement(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el dato a agregar")));
+                    list.addElement(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el dato a agregar")));
                     break;
                 case "Eliminar":
-                    if (!lista.isEmpty()) {
-                        lista.delete(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el valor a eliminar")));
+                    if (!list.isEmpty()) {
+                        list.delete(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el valor a eliminar")));
                     } else {
                         JOptionPane.showMessageDialog(null, "La lista está vacia");
                     }
                     break;
                 case "Recorrer hacia delante":
-                    lista.printList();
+                    list.printList();
                     break;
                 case "Recorrer hacia atrás":
-                    lista.invertList();
+                    list.invertList();
                     break;
                 case "Insertar ordenado":
-                    lista.addElementInOrder(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el dato a agregar ordenado")));
+                    list.addElementInOrder(Integer.parseInt(JOptionPane.showInputDialog(null, "Ingresa el dato a agregar ordenado")));
                     break;
             }
         }
@@ -56,8 +56,6 @@ public class DoublyLinkedList {
     static class List {
 
         int data;
-        int position;
-
         Node start;
         Node end;
 
@@ -67,107 +65,100 @@ public class DoublyLinkedList {
         }
 
         boolean isEmpty() {
-            if (start == null) {
-                return true;
-            } else {
-                return false;
-            }
+            return start == null;
         }
 
         void addElement(int data) {
 
             if (isEmpty()) {
                 Node newNode = new Node(data);
-                start = newNode;
-                end = newNode;
-                setPosition(1);
+                start = end = newNode;
             } else {
                 Node newNode = new Node(data);
                 end.next = newNode;
                 newNode.previous = end;
                 end = newNode;
-                setPosition(getPosition() + 1);
+                end.next = null;
             }
+            JOptionPane.showMessageDialog(null, "Elemento agregado");
         }
 
         void addElementInOrder(int data) {
             if (isEmpty()) {
                 Node newNode = new Node(data);
-                start = newNode;
-                end = newNode;
-                setPosition(getPosition() + 1);
+                start = end = newNode;
+                JOptionPane.showMessageDialog(null, "Elemento ordenado agregado");
             } else {
-                if (data <= start.data) {
-                    Node newNode = new Node(data);
-                    newNode.next = start;
+                Node newNode = new Node(data);
+                Node aux = start;
+                if (newNode.data <= start.data) {
                     start.previous = newNode;
+                    newNode.next = start;
                     start = newNode;
-                    setPosition(getPosition() + 1);
-                } else if (data >= start.data && data <= end.data) {
-                    Node newNode = new Node(data);
-                    Node prev = null;
-                    Node aux = start;
-                    while (aux != end) {
-                        if (newNode.data < aux.data) {
+                    start.previous = null;
+                    JOptionPane.showMessageDialog(null, "Elemento ordenado agregado");
+                } else {
+                    while (aux != null) {
+                        if (newNode.data <= aux.data) {
+                            Node prev = aux.previous;
                             newNode.next = aux;
-                            prev = aux.previous;
                             newNode.previous = prev;
                             prev.next = newNode;
                             aux.previous = newNode;
-                            setPosition(getPosition() + 1);
-                            break;
+                            JOptionPane.showMessageDialog(null, "Elemento ordenado agregado");
+                            return;
                         }
                         aux = aux.next;
                     }
-                } else if (data >= end.data) {
-                    Node newNode = new Node(data);
-                    end.next = newNode;
-                    newNode.previous = end;
-                    newNode.next = null;
-                    end = newNode;
-                    setPosition(getPosition() + 1);
-                } else if (getPosition() == 3 || data >= start.data && data <= end.data) {
-                    Node newNode = new Node(data);
-                    newNode.next = end;
-                    newNode.previous = start;
-                    end.previous = newNode;
-                    end.next = null;
-                    start.next = newNode;
-                    start.previous = null;
-                    setPosition(getPosition() + 1);
+                    if (newNode.data >= end.data) {
+                        end.next = newNode;
+                        newNode.previous = end;
+                        end = newNode;
+                        end.next = null;
+                        JOptionPane.showMessageDialog(null, "Elemento ordenado agregado");
+                    }
                 }
-
             }
-            JOptionPane.showMessageDialog(null, "Elemento ordenado agregado");
         }
 
         void delete(int data) {
-            boolean found = false;
-            Node prev = null;
-            Node selector = start;
-            while (selector != end) {
-                if (selector.data == data) {
-                    found = true;
-                    if (prev == null) {
-                        start = selector.next;
-                        start.previous = null;
-                    } else {
-                        prev.next = selector.next;
-                        Node aux;
-                        aux = selector.next;
-                        aux.previous = prev;
+            if (isEmpty()) {
+                JOptionPane.showMessageDialog(null, "La lista está vacia");
+            } else {
+                Node aux = start;
+                boolean found = false;
+                while (aux != null) {
+                    if (aux.data == data) {
+                        found = true;
+                        if (aux == start && aux == end) {
+                            start = end = null;
+                            JOptionPane.showMessageDialog(null, "Valor eliminado\n\nLa lista ha quedado vacía");
+                            return;
+                        } else if (aux == start) {
+                            start = aux.next;
+                            start.previous = null;
+                            JOptionPane.showMessageDialog(null, "Valor eliminado");
+                            return;
+                        } else if (aux == end) {
+                            end = aux.previous;
+                            end.next = null;
+                            JOptionPane.showMessageDialog(null, "Valor eliminado");
+                            return;
+                        } else {
+                            Node prev = aux.previous;
+                            Node nex = aux.next;
+                            prev.next = nex;
+                            nex.previous = prev;
+                            JOptionPane.showMessageDialog(null, "Valor eliminado");
+                            return;
+                        }
+
                     }
-                    JOptionPane.showMessageDialog(null, "Valor: " + data + "\nEliminado");
-                    setPosition(getPosition() - 1);
+                    aux = aux.next;
                 }
-                prev = selector;
-                selector = selector.next;
-            }
-            if (data == end.data) {
-                end = selector.previous;
-            }
-            if (!found) {
-                JOptionPane.showMessageDialog(null, "Valor: " + data + "\nNo encontrado");
+                if (!found) {
+                    JOptionPane.showMessageDialog(null, "Valor no encontrado");
+                }
             }
         }
 
@@ -200,14 +191,5 @@ public class DoublyLinkedList {
                 JOptionPane.showMessageDialog(null, "Recorrido hacia delante: \n" + list);
             }
         }
-
-        public void setPosition(int position) {
-            this.position = position;
-        }
-
-        public int getPosition() {
-            return position;
-        }
     }
-
 }
